@@ -19,8 +19,8 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "~/components/ui/pagination";
-import { DeviceFormDialog } from "~/components/device/DeviceFormDialog";
-import { DeviceInfoDialog } from "~/components/device/DeviceInfoDialog";
+import { DeviceFormDialog } from "~/components/layouts/device/DeviceFormDialog";
+import { DeviceInfoDialog } from "~/components/layouts/device/DeviceInfoDialog";
 import { deviceService } from "~/services/device.service";
 import { useDeviceSignalR } from "~/hooks/useDeviceSignalR";
 import type {

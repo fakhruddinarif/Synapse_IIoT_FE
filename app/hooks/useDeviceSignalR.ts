@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import * as signalR from "@microsoft/signalr";
 import type { DeviceData } from "~/types/device";
 
-const HUB_URL = `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/hubs/device-data`;
+const HUB_URL = `${import.meta.env.VITE_API_URL || "http://localhost:5009"}/hubs/device-data`;
 
 export function useDeviceSignalR() {
   const [connection, setConnection] = useState<signalR.HubConnection | null>(

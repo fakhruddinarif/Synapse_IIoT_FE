@@ -10,7 +10,7 @@ const routes: RouteConfig = [
     index("routes/home.tsx"),
     route("/connectivity/devices", "routes/connectivity-device.tsx"),
     route("/connectivity/tag-manager", "routes/connectivity-tag.tsx"),
-    route("/connectivity/opc-ua-server", "routes/connectivity-opcua.tsx"),
+    route("/data-engine/dynamic-tables", "routes/dynamic-tables.tsx"),
   ]),
   route("/login", "routes/login.tsx"),
   route("/register", "routes/register.tsx"),

@@ -20,10 +20,21 @@ export const menus: MenuItem[] = [
         icon: "ri-hashtag",
         url: "/connectivity/tag-manager",
       },
+    ],
+  },
+  {
+    title: "Data Engine",
+    icon: "ri-database-line",
+    sub_menus: [
       {
-        title: "OPC UA Server",
-        icon: "ri-server-line",
-        url: "/connectivity/opc-ua-server",
+        title: "Dynamic Tables",
+        icon: "ri-table-line",
+        url: "/data-engine/dynamic-tables",
+      },
+      {
+        title: "Storage Flows",
+        icon: "ri-flow-chart",
+        url: "/data-engine/storage-flows",
       },
     ],
   },
