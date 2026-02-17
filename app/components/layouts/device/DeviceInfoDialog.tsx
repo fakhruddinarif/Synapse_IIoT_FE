@@ -122,9 +122,7 @@ export function DeviceInfoDialog({
               </div>
               <div>
                 <p className="text-sm text-gray-500">Protocol</p>
-                <p className="font-semibold">
-                  {ProtocolLabels[device.protocol]}
-                </p>
+                <p className="font-semibold">{device.protocol}</p>
               </div>
               <div>
                 <p className="text-sm text-gray-500">Description</p>

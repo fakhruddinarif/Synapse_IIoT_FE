@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router";
-import { useAuth } from "~/presentation/contexts/auth.context";
+import { useAuth } from "~/contexts/auth.context";
 import { Spinner } from "~/components/ui/spinner";
 
 interface ProtectedRouteProps {

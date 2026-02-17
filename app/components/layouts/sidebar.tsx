@@ -29,7 +29,7 @@ import {
 import { menus } from "./menu";
 import type { MenuItem } from "~/types/menu.type";
 import { ChevronRight, ChevronsUpDown, KeyRound, LogOut } from "lucide-react";
-import { useAuth } from "~/presentation/contexts/auth.context";
+import { useAuth } from "~/contexts/auth.context";
 
 export function AppSidebar() {
   const { user, logout } = useAuth();

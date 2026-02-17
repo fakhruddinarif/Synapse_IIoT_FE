@@ -6,16 +6,10 @@ import {
   useMemo,
   type ReactNode,
 } from "react";
-import type { UserEntity } from "~/domain/entities/user.entity";
-import type {
-  IAuthRepository,
-  LoginCredentials,
-  RegisterData,
-} from "~/domain/repositories/auth.repository";
-import { authRepository } from "~/core/di/container";
+import { authService, type User, type LoginCredentials, type RegisterData } from "~/services/auth.service";
 
 export interface AuthContextValue {
-  user: UserEntity | null;
+  user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (credentials: LoginCredentials) => Promise<void>;
@@ -28,20 +22,16 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 interface AuthProviderProps {
   readonly children: ReactNode;
-  readonly repository?: IAuthRepository;
 }
 
-export function AuthProvider({
-  children,
-  repository = authRepository,
-}: AuthProviderProps) {
-  const [user, setUser] = useState<UserEntity | null>(null);
+export function AuthProvider({ children }: AuthProviderProps) {
+  const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const checkAuth = async () => {
     try {
-      const userEntity = await repository.getCurrentUser();
-      setUser(userEntity);
+      const response = await authService.getCurrentUser();
+      setUser(response.data);
     } catch (error) {
       setUser(null);
       console.error("Auth check failed:", error);
@@ -56,17 +46,17 @@ export function AuthProvider({
   }, []);
 
   const login = async (credentials: LoginCredentials) => {
-    const userEntity = await repository.login(credentials);
-    setUser(userEntity);
+    const response = await authService.login(credentials);
+    setUser(response.data);
   };
 
   const register = async (data: RegisterData) => {
-    const userEntity = await repository.register(data);
-    setUser(userEntity);
+    const response = await authService.register(data);
+    setUser(response.data);
   };
 
   const logout = async () => {
-    await repository.logout();
+    await authService.logout();
     setUser(null);
   };
 

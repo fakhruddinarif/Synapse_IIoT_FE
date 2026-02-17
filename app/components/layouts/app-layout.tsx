@@ -1,7 +1,7 @@
 import { Outlet } from "react-router";
 import { SidebarProvider, SidebarTrigger } from "~/components/ui/sidebar";
 import { AppSidebar } from "./sidebar";
-import { ProtectedRoute } from "~/presentation/components/protected-route";
+import { ProtectedRoute } from "~/components/protected-route";
 
 export default function AppLayout() {
   return (

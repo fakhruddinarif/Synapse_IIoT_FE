@@ -12,8 +12,8 @@ import {
 } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { useAuth } from "~/presentation/contexts/auth.context";
-import { LoginRequestSchema } from "~/data/schemas/auth.schema";
+import { useAuth } from "~/contexts/auth.context";
+import { LoginRequestSchema } from "~/services/auth.service";
 import { z } from "zod";
 
 export function loader() {
