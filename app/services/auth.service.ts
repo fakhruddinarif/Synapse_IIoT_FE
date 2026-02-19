@@ -94,15 +94,16 @@ export const authService = {
   },
 
   async register(data: RegisterData): Promise<ApiResponse<User>> {
+    // CSRF Token temporarily disabled
     // Get CSRF token first
-    const csrfResponse = await this.getCsrfToken();
-    const csrfToken = csrfResponse.data.csrf_token;
+    // const csrfResponse = await this.getCsrfToken();
+    // const csrfToken = csrfResponse.data.csrf_token;
 
     return fetchApi<ApiResponse<User>>("/auth/register", {
       method: "POST",
-      headers: {
-        "X-CSRF-TOKEN": csrfToken,
-      },
+      // headers: {
+      //   "X-CSRF-TOKEN": csrfToken,
+      // },
       body: JSON.stringify({
         username: data.username,
         password: data.password,

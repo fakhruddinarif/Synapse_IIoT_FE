@@ -10,6 +10,7 @@ import {
 import type { Route } from "./+types/root";
 import "./app.css";
 import { AuthProvider } from "./contexts/auth.context";
+import { ErrorProvider } from "./contexts/error.context";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -44,9 +45,11 @@ export function Layout({ children }: { readonly children: React.ReactNode }) {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <Outlet />
-    </AuthProvider>
+    <ErrorProvider>
+      <AuthProvider>
+        <Outlet />
+      </AuthProvider>
+    </ErrorProvider>
   );
 }
 

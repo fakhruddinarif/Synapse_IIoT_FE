@@ -9,7 +9,7 @@ import { Card, CardContent } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { NoData } from "~/components/ui/no-data";
-import { Spinner } from "~/components/ui/spinner";
+import { Skeleton } from "~/components/ui/skeleton";
 import {
   Pagination,
   PaginationContent,
@@ -27,6 +27,7 @@ import {
 import { MasterTableFormDialog } from "~/components/layouts/master-table/MasterTableFormDialog";
 import { MasterTableFieldsDialog } from "~/components/layouts/master-table/MasterTableFieldsDialog";
 import { masterTableService } from "~/services/master-table.service";
+import { useError } from "~/contexts/error.context";
 import type {
   MasterTable,
   CreateMasterTableDto,
@@ -34,6 +35,7 @@ import type {
 } from "~/types/master-table";
 
 export default function DynamicTables() {
+  const { showError } = useError();
   const [masterTables, setMasterTables] = useState<MasterTable[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -108,7 +110,10 @@ export default function DynamicTables() {
       fetchMasterTables();
     } catch (error) {
       console.error("Error deleting table:", error);
-      alert(error instanceof Error ? error.message : "Failed to delete table");
+      showError(
+        error instanceof Error ? error.message : "Failed to delete table",
+        "Delete Error",
+      );
     }
   };
 
@@ -176,8 +181,83 @@ export default function DynamicTables() {
 
           {/* Loading */}
           {loading && (
-            <div className="flex justify-center items-center py-12">
-              <Spinner />
+            <div className="relative overflow-x-auto rounded-lg border">
+              <table className="w-full text-sm text-left">
+                <thead className="text-xs uppercase bg-gray-50 border-b">
+                  <tr>
+                    <th scope="col" className="px-4 sm:px-6 py-3">
+                      #
+                    </th>
+                    <th scope="col" className="px-4 sm:px-6 py-3">
+                      Name
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-4 sm:px-6 py-3 hidden md:table-cell"
+                    >
+                      Table Name
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-4 sm:px-6 py-3 hidden lg:table-cell"
+                    >
+                      Description
+                    </th>
+                    <th scope="col" className="px-4 sm:px-6 py-3">
+                      Status
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-4 sm:px-6 py-3 hidden xl:table-cell"
+                    >
+                      Fields
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-4 sm:px-6 py-3 hidden lg:table-cell"
+                    >
+                      Created At
+                    </th>
+                    <th scope="col" className="px-4 sm:px-6 py-3 text-center">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Array.from({ length: 5 }).map((_, index) => (
+                    <tr key={`skeleton-${index}`} className="border-b">
+                      <td className="px-4 sm:px-6 py-4">
+                        <Skeleton className="h-4 w-8" />
+                      </td>
+                      <td className="px-4 sm:px-6 py-4">
+                        <Skeleton className="h-4 w-32" />
+                      </td>
+                      <td className="px-4 sm:px-6 py-4 hidden md:table-cell">
+                        <Skeleton className="h-4 w-24" />
+                      </td>
+                      <td className="px-4 sm:px-6 py-4 hidden lg:table-cell">
+                        <Skeleton className="h-4 w-48" />
+                      </td>
+                      <td className="px-4 sm:px-6 py-4">
+                        <Skeleton className="h-6 w-16" />
+                      </td>
+                      <td className="px-4 sm:px-6 py-4 hidden xl:table-cell">
+                        <Skeleton className="h-6 w-20" />
+                      </td>
+                      <td className="px-4 sm:px-6 py-4 hidden lg:table-cell">
+                        <Skeleton className="h-4 w-28" />
+                      </td>
+                      <td className="px-4 sm:px-6 py-4">
+                        <div className="flex justify-center gap-2">
+                          <Skeleton className="h-8 w-8" />
+                          <Skeleton className="h-8 w-8" />
+                          <Skeleton className="h-8 w-8" />
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
 

@@ -54,7 +54,7 @@ export default function Register() {
       // Validate form data with Zod
       const validatedData = RegisterRequestSchema.parse(formData);
 
-      await register(validatedData);
+      await register(validatedData as Parameters<typeof register>[0]);
       navigate("/", { replace: true });
     } catch (err) {
       if (err instanceof z.ZodError) {

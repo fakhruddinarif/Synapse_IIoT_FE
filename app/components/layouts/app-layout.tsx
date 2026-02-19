@@ -9,7 +9,7 @@ export default function AppLayout() {
       <SidebarProvider>
         <AppSidebar />
         <main className="w-full">
-          <div className="border-b px-4 py-2">
+          <div className="sticky top-0 z-20 bg-white dark:bg-gray-950 border-b px-4 py-2">
             <SidebarTrigger />
           </div>
           <div className="p-4">

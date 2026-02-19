@@ -16,6 +16,7 @@ import type {
 } from "~/types/master-table";
 import { DataTypeTableLabels } from "~/types/master-table";
 import { masterTableService } from "~/services/master-table.service";
+import { useError } from "~/contexts/error.context";
 
 interface MasterTableFieldsDialogProps {
   open: boolean;
@@ -27,7 +28,8 @@ export function MasterTableFieldsDialog({
   open,
   onOpenChange,
   masterTable,
-}: MasterTableFieldsDialogProps) {
+}: Readonly<MasterTableFieldsDialogProps>) {
+  const { showError } = useError();
   const [fields, setFields] = useState<MasterTableField[]>([]);
   const [loading, setLoading] = useState(false);
   const [addingField, setAddingField] = useState(false);
@@ -39,9 +41,11 @@ export function MasterTableFieldsDialog({
 
   useEffect(() => {
     if (masterTable && open) {
-      setFields(masterTable.fields);
+      setFields([...masterTable.fields]);
+      setAddingField(false);
+      setNewField({ name: "", dataType: 0, isEnabled: true });
     }
-  }, [masterTable, open]);
+  }, [masterTable?.id, open]);
 
   const handleAddField = async () => {
     if (!masterTable) return;
@@ -58,7 +62,10 @@ export function MasterTableFieldsDialog({
       }
     } catch (error) {
       console.error("Error adding field:", error);
-      alert(error instanceof Error ? error.message : "Failed to add field");
+      showError(
+        error instanceof Error ? error.message : "Failed to add field",
+        "Add Field Error",
+      );
     } finally {
       setLoading(false);
     }
@@ -81,7 +88,10 @@ export function MasterTableFieldsDialog({
       }
     } catch (error) {
       console.error("Error updating field:", error);
-      alert(error instanceof Error ? error.message : "Failed to update field");
+      showError(
+        error instanceof Error ? error.message : "Failed to update field",
+        "Update Field Error",
+      );
     } finally {
       setLoading(false);
     }
@@ -97,7 +107,10 @@ export function MasterTableFieldsDialog({
       setFields(fields.filter((f) => f.id !== fieldId));
     } catch (error) {
       console.error("Error deleting field:", error);
-      alert(error instanceof Error ? error.message : "Failed to delete field");
+      showError(
+        error instanceof Error ? error.message : "Failed to delete field",
+        "Delete Field Error",
+      );
     } finally {
       setLoading(false);
     }
@@ -111,12 +124,12 @@ export function MasterTableFieldsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Manage Fields - {masterTable.name}</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
+        <div className="flex-1 overflow-y-auto space-y-4 py-4 px-1">
           {/* Add Field Button */}
           {!addingField && (
             <Button
@@ -130,7 +143,10 @@ export function MasterTableFieldsDialog({
 
           {/* Add Field Form */}
           {addingField && (
-            <div className="border rounded-lg p-4 bg-green-50 space-y-3">
+            <div
+              key="add-field-form"
+              className="border rounded-lg p-4 bg-green-50 space-y-3"
+            >
               <h4 className="font-semibold text-sm">New Field</h4>
               <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
                 <div className="md:col-span-4">
@@ -141,6 +157,7 @@ export function MasterTableFieldsDialog({
                       setNewField({ ...newField, name: e.target.value })
                     }
                     placeholder="Field name"
+                    autoFocus
                   />
                 </div>
                 <div className="md:col-span-3">

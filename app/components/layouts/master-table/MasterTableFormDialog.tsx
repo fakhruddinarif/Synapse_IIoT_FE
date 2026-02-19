@@ -16,6 +16,7 @@ import type {
   CreateMasterTableField,
 } from "~/types/master-table";
 import { DataTypeTableLabels } from "~/types/master-table";
+import { useError } from "~/contexts/error.context";
 
 interface MasterTableFormDialogProps {
   open: boolean;
@@ -31,7 +32,8 @@ export function MasterTableFormDialog({
   onOpenChange,
   masterTable,
   onSubmit,
-}: MasterTableFormDialogProps) {
+}: Readonly<MasterTableFormDialogProps>) {
+  const { showError } = useError();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -68,31 +70,38 @@ export function MasterTableFormDialog({
     }
   }, [masterTable, open]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const data = masterTable
-        ? ({
-            name: formData.name,
-            tableName: formData.tableName,
-            description: formData.description,
-            isActive: formData.isActive,
-          } as UpdateMasterTableDto)
-        : ({
-            name: formData.name,
-            tableName: formData.tableName,
-            description: formData.description,
-            isActive: formData.isActive,
-            fields: fields,
-          } as CreateMasterTableDto);
+      let data;
+      if (masterTable) {
+        data = {
+          name: formData.name,
+          tableName: formData.tableName,
+          description: formData.description,
+          isActive: formData.isActive,
+          fields: fields,
+        } as UpdateMasterTableDto;
+      } else {
+        data = {
+          name: formData.name,
+          tableName: formData.tableName,
+          description: formData.description,
+          isActive: formData.isActive,
+          fields: fields,
+        } as CreateMasterTableDto;
+      }
 
       await onSubmit(data);
       onOpenChange(false);
     } catch (error) {
       console.error("Error submitting form:", error);
-      alert(error instanceof Error ? error.message : "An error occurred");
+      showError(
+        error instanceof Error ? error.message : "An error occurred",
+        "Form Error",
+      );
     } finally {
       setLoading(false);
     }
@@ -123,17 +132,22 @@ export function MasterTableFormDialog({
     setFields(newFields);
   };
 
+  const getButtonText = () => {
+    if (loading) return "Saving...";
+    return masterTable ? "Update" : "Create";
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>
             {masterTable ? "Edit Master Table" : "Add New Master Table"}
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit}>
-          <div className="space-y-4 py-4">
+        <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0">
+          <div className="flex-1 overflow-y-auto space-y-4 py-4 px-1">
             {/* Basic Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -222,7 +236,7 @@ export function MasterTableFormDialog({
                 <div className="space-y-2">
                   {fields.map((field, index) => (
                     <div
-                      key={index}
+                      key={`field-${field.name}-${field.type}-${index}`}
                       className="grid grid-cols-1 md:grid-cols-12 gap-2 p-3 border rounded-lg bg-gray-50"
                     >
                       <div className="md:col-span-4">
@@ -289,7 +303,7 @@ export function MasterTableFormDialog({
             )}
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="border-t pt-4">
             <Button
               type="button"
               variant="outline"
@@ -299,15 +313,8 @@ export function MasterTableFormDialog({
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? (
-                <>
-                  <i className="ri-loader-4-line animate-spin mr-2" /> Saving...
-                </>
-              ) : masterTable ? (
-                "Update"
-              ) : (
-                "Create"
-              )}
+              {loading && <i className="ri-loader-4-line animate-spin mr-2" />}
+              {getButtonText()}
             </Button>
           </DialogFooter>
         </form>

@@ -6,7 +6,14 @@ import {
   useMemo,
   type ReactNode,
 } from "react";
-import { authService, type User, type LoginCredentials, type RegisterData } from "~/services/auth.service";
+import { id } from "zod/locales";
+import {
+  authService,
+  type User,
+  type LoginCredentials,
+  type RegisterData,
+  type UserRole,
+} from "~/services/auth.service";
 
 export interface AuthContextValue {
   user: User | null;

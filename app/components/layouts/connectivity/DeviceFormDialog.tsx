@@ -17,11 +17,12 @@ import type {
   HttpConfig,
   MqttConfig,
 } from "~/types/device";
+import { useError } from "~/contexts/error.context";
 
 interface DeviceFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  device?: Device;
+  device?: Device | null;
   protocol: Protocol;
   onSubmit: (data: CreateDeviceDto | UpdateDeviceDto) => Promise<void>;
 }
@@ -32,7 +33,8 @@ export function DeviceFormDialog({
   device,
   protocol,
   onSubmit,
-}: DeviceFormDialogProps) {
+}: Readonly<DeviceFormDialogProps>) {
+  const { showError } = useError();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -42,7 +44,7 @@ export function DeviceFormDialog({
   });
 
   const [httpConfig, setHttpConfig] = useState<HttpConfig>({
-    url: "http://localhost:5009/api/device/http-test",
+    url: "",
     method: "GET",
     headers: {},
   });
@@ -78,10 +80,10 @@ export function DeviceFormDialog({
         name: "",
         description: "",
         isEnabled: false,
-        pollingInterval: protocol === 2 ? 1000 : 5000,
+        pollingInterval: 0,
       });
       setHttpConfig({
-        url: "http://localhost:5009/api/device/http-test",
+        url: "",
         method: "GET",
         headers: {},
       });
@@ -124,25 +126,31 @@ export function DeviceFormDialog({
       onOpenChange(false);
     } catch (error) {
       console.error("Error submitting form:", error);
-      alert(error instanceof Error ? error.message : "An error occurred");
+      showError(
+        error instanceof Error ? error.message : "An error occurred",
+        "Form Error",
+      );
     } finally {
       setLoading(false);
     }
   };
 
+  const submitButtonText = loading ? "Saving..." : device ? "Update" : "Create";
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{device ? "Edit Device" : "Add New Device"}</DialogTitle>
+          <DialogTitle>
+            {device ? "Update Device" : "Add New Device"}
+          </DialogTitle>
         </DialogHeader>
-
         <form onSubmit={handleSubmit}>
-          <div className="space-y-4 py-4">
-            {/* Basic Information */}
+          <div className="space-y-4 py-4 no-scrollbar -mx-4 max-h-[50vh] overflow-y-auto px-4">
+            {/* Device Name */}
             <div className="space-y-2">
               <Label htmlFor="name">
-                Device Name <span className="text-red-500">*</span>
+                Device Name<span className="text-red-500">*</span>
               </Label>
               <Input
                 id="name"
@@ -150,11 +158,12 @@ export function DeviceFormDialog({
                 onChange={(e) =>
                   setFormData({ ...formData, name: e.target.value })
                 }
+                placeholder="Enter device name"
                 required
-                maxLength={100}
               />
             </div>
 
+            {/* Description */}
             <div className="space-y-2">
               <Label htmlFor="description">Description</Label>
               <Input
@@ -163,28 +172,14 @@ export function DeviceFormDialog({
                 onChange={(e) =>
                   setFormData({ ...formData, description: e.target.value })
                 }
-                maxLength={255}
+                placeholder="Enter device description"
               />
             </div>
 
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="isEnabled"
-                checked={formData.isEnabled}
-                onChange={(e) =>
-                  setFormData({ ...formData, isEnabled: e.target.checked })
-                }
-                className="h-4 w-4 rounded border-gray-300"
-              />
-              <Label htmlFor="isEnabled" className="!mt-0">
-                Enable Device
-              </Label>
-            </div>
-
+            {/* Polling Interval */}
             <div className="space-y-2">
               <Label htmlFor="pollingInterval">
-                Polling Interval (ms) <span className="text-red-500">*</span>
+                Polling Interval (ms)<span className="text-red-500">*</span>
               </Label>
               <Input
                 id="pollingInterval"
@@ -193,23 +188,41 @@ export function DeviceFormDialog({
                 onChange={(e) =>
                   setFormData({
                     ...formData,
-                    pollingInterval: Number.parseInt(e.target.value) || 1000,
+                    pollingInterval: Number.parseInt(e.target.value),
                   })
                 }
+                placeholder="Enter polling interval"
                 required
-                min={100}
+                min="100"
               />
+            </div>
+
+            {/* Is Enabled */}
+            <div className="flex items-center space-x-2">
+              <input
+                id="isEnabled"
+                type="checkbox"
+                checked={formData.isEnabled}
+                onChange={(e) =>
+                  setFormData({ ...formData, isEnabled: e.target.checked })
+                }
+                className="h-4 w-4"
+              />
+              <Label htmlFor="isEnabled" className="cursor-pointer">
+                Enable Device
+              </Label>
             </div>
 
             {/* HTTP Configuration */}
             {protocol === 4 && (
               <>
-                <hr className="my-4" />
-                <h3 className="font-semibold">HTTP Configuration</h3>
+                <div className="pt-4 border-t">
+                  <h3 className="font-semibold mb-4">HTTP Configuration</h3>
+                </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="url">
-                    URL <span className="text-red-500">*</span>
+                    URL<span className="text-red-500">*</span>
                   </Label>
                   <Input
                     id="url"
@@ -217,25 +230,29 @@ export function DeviceFormDialog({
                     onChange={(e) =>
                       setHttpConfig({ ...httpConfig, url: e.target.value })
                     }
+                    placeholder="Enter endpoint URL"
                     required
-                    placeholder="http://localhost:5009/api/device/http-test"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="method">HTTP Method</Label>
+                  <Label htmlFor="method">
+                    Method<span className="text-red-500">*</span>
+                  </Label>
                   <select
                     id="method"
                     value={httpConfig.method}
                     onChange={(e) =>
-                      setHttpConfig({ ...httpConfig, method: e.target.value })
+                      setHttpConfig({
+                        ...httpConfig,
+                        method: e.target.value as "GET" | "POST",
+                      })
                     }
-                    className="w-full px-3 py-2 border rounded-md"
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    required
                   >
                     <option value="GET">GET</option>
                     <option value="POST">POST</option>
-                    <option value="PUT">PUT</option>
-                    <option value="DELETE">DELETE</option>
                   </select>
                 </div>
               </>
@@ -244,60 +261,65 @@ export function DeviceFormDialog({
             {/* MQTT Configuration */}
             {protocol === 2 && (
               <>
-                <hr className="my-4" />
-                <h3 className="font-semibold">MQTT Configuration</h3>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="brokerUrl">
-                      Broker URL <span className="text-red-500">*</span>
-                    </Label>
-                    <Input
-                      id="brokerUrl"
-                      value={mqttConfig.brokerUrl}
-                      onChange={(e) =>
-                        setMqttConfig({
-                          ...mqttConfig,
-                          brokerUrl: e.target.value,
-                        })
-                      }
-                      required
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="port">
-                      Port <span className="text-red-500">*</span>
-                    </Label>
-                    <Input
-                      id="port"
-                      type="number"
-                      value={mqttConfig.port}
-                      onChange={(e) =>
-                        setMqttConfig({
-                          ...mqttConfig,
-                          port: Number.parseInt(e.target.value) || 1883,
-                        })
-                      }
-                      required
-                    />
-                  </div>
+                <div className="pt-4 border-t">
+                  <h3 className="font-semibold mb-4">MQTT Configuration</h3>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="clientId">Client ID</Label>
+                  <Label htmlFor="brokerUrl">
+                    Broker URL<span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    id="brokerUrl"
+                    value={mqttConfig.brokerUrl}
+                    onChange={(e) =>
+                      setMqttConfig({
+                        ...mqttConfig,
+                        brokerUrl: e.target.value,
+                      })
+                    }
+                    placeholder="localhost"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="port">
+                    Port<span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    id="port"
+                    type="number"
+                    value={mqttConfig.port}
+                    onChange={(e) =>
+                      setMqttConfig({
+                        ...mqttConfig,
+                        port: Number.parseInt(e.target.value),
+                      })
+                    }
+                    placeholder="1883"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="clientId">
+                    Client ID<span className="text-red-500">*</span>
+                  </Label>
                   <Input
                     id="clientId"
                     value={mqttConfig.clientId}
                     onChange={(e) =>
                       setMqttConfig({ ...mqttConfig, clientId: e.target.value })
                     }
+                    placeholder="client-id"
+                    required
                   />
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="topic">
-                    Topic <span className="text-red-500">*</span>
+                    Topic<span className="text-red-500">*</span>
                   </Label>
                   <Input
                     id="topic"
@@ -305,53 +327,23 @@ export function DeviceFormDialog({
                     onChange={(e) =>
                       setMqttConfig({ ...mqttConfig, topic: e.target.value })
                     }
+                    placeholder="#"
                     required
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="username">Username (Optional)</Label>
-                    <Input
-                      id="username"
-                      value={mqttConfig.username || ""}
-                      onChange={(e) =>
-                        setMqttConfig({
-                          ...mqttConfig,
-                          username: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="password">Password (Optional)</Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      value={mqttConfig.password || ""}
-                      onChange={(e) =>
-                        setMqttConfig({
-                          ...mqttConfig,
-                          password: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
-                </div>
-
                 <div className="flex items-center space-x-2">
                   <input
-                    type="checkbox"
                     id="useTls"
+                    type="checkbox"
                     checked={mqttConfig.useTls}
                     onChange={(e) =>
                       setMqttConfig({ ...mqttConfig, useTls: e.target.checked })
                     }
-                    className="h-4 w-4 rounded border-gray-300"
+                    className="h-4 w-4"
                   />
-                  <Label htmlFor="useTls" className="!mt-0">
-                    Use TLS/SSL
+                  <Label htmlFor="useTls" className="cursor-pointer">
+                    Use TLS
                   </Label>
                 </div>
               </>
@@ -368,7 +360,7 @@ export function DeviceFormDialog({
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? "Saving..." : device ? "Update" : "Create"}
+              {submitButtonText}
             </Button>
           </DialogFooter>
         </form>
