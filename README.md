@@ -1,230 +1,86 @@
-# Synapse IIoT Frontend
+# Synapse IIoT Core
 
-Platform IIoT (Industrial Internet of Things) berbasis React Router untuk mengelola konektivitas perangkat dan data secara real-time.
+## Description
 
-## 🚀 Teknologi
+Menjadi platform Industrial IoT Gateway dan Mini-SCADA modern yang menjembatani kesenjangan antara perangkat keras pabrik (OT Layer) dengan sistem manajemen data (IT Layer) secara real-time, aman, dan fleksibel.
 
-- React Router v7 dengan Server-side Rendering
-- TypeScript untuk type safety
-- TailwindCSS untuk styling
-- SignalR untuk real-time communication
-- Vite untuk build tool
+## User Personas
 
-## 📋 Daftar Menu & Fitur
+- **System Integrator / OT Engineer**: Bertanggung jawab melakukan konfigurasi mesin, mapping alamat memori (Tag), mengatur rentang konversi nilai (Scaling), dan membuat Storage Flows.
+- **Plant Operator**: Memantau dashboard produksi secara real-time, melihat status online/offline mesin, dan menganalisis grafik Historian.
+- **IT/Security Manager**: Bertanggung jawab atas keamanan jaringan dan memonitor Audit Trails.
 
-### 1. Connectivity - Devices
+## System Architecture & Tech Stack
 
-Menu untuk mengelola perangkat IoT yang terhubung dengan sistem. Mendukung protokol HTTP dan MQTT.
+Sistem menggunakan arsitektur Decoupled Hybrid yang memisahkan beban baca (Fast Loop) dan beban tulis (Slow Loop).
 
-**URL:** `/connectivity/devices`
+- **Frontend (UI/UX)**: React.js (Vite), TypeScript, Tailwind CSS, Shadcn/UI, Zustand (State Management)
+- **Backend (Core Engine)**: ASP.NET Core 8 Web API
+- **Real-time Engine**: ASP.NET Core SignalR (WebSockets) dengan topologi Pub/Sub Groups
+- **Database (Config & User Tables)**: MySQL 8.0
+- **Database (Historian)**: InfluxDB
 
-![Connectivity Devices](./docs/images/connectivity-devices.png)
-_Screenshot halaman Connectivity Devices_
+## Detailed Functional Requirements
 
-#### Fitur:
+### Modul 1: Security & Authentication Layer
 
-- **Tampilan Berbasis Tab**: Protokol HTTP dan MQTT ditampilkan dalam tab terpisah
-- **Search & Filter**: Pencarian perangkat berdasarkan nama
-- **Pagination**: Navigasi data dengan sistem paginasi (10 item per halaman)
-- **Real-time Updates**: Integrasi SignalR untuk update status perangkat secara real-time
-- **CRUD Operations**:
-  - Create: Tambah perangkat baru
-  - Read: Lihat daftar & detail perangkat
-  - Update: Edit konfigurasi perangkat
-  - Delete: Hapus perangkat dengan konfirmasi
+Fondasi keamanan untuk mencegah akses tidak sah ke kontrol infrastruktur kritis.
 
-#### Dialog yang Tersedia:
+| Fitur          | Deskripsi Teknis                                                                     |
+| -------------- | ------------------------------------------------------------------------------------ |
+| Login          | Mendukung Login Lokal (Bcrypt Hashing)                                               |
+| Register       | Mendukung register pengguna hanya untuk SUPERADMIN                                   |
+| Secure Session | Menggunakan JWT Token yang disimpan eksklusif di HTTP-Only Cookie (Anti-XSS)         |
+| Anti-CSRF      | Endpoint mutasi data (POST/PUT/DEL) dilindungi oleh validasi X-CSRF-TOKEN header     |
+| Rate Limiting  | Proteksi Brute-Force bawaan .NET (Maksimal 5 request per menit untuk endpoint Login) |
 
-##### a. Device Form Dialog
+### Modul 2: OT Connectivity / Device Manager
 
-Dialog untuk menambah atau mengedit perangkat.
+Mesin komunikasi dengan perangkat keras fisik di lapangan.
 
-![Device Form Dialog](./docs/images/device-form-dialog.png)
-_Screenshot Device Form Dialog_
+| Fitur                 | Deskripsi Teknis                                                                                                                                                                                     |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Multi-Protocol Driver | Mendukung Modbus TCP, Modbus RTU, MQTT Client, OPC UA, dan HTTP REST Poller                                                                                                                          |
+| Dynamic JSON Config   | Parameter koneksi (IP, Port, Topic, Baud Rate) disimpan fleksibel dalam kolom `ConnectionConfigJson` di MySQL                                                                                        |
+| In-Memory Registry    | Singleton Service di RAM untuk mendaftarkan device aktif, memungkinkan penambahan mesin baru tanpa restart aplikasi                                                                                  |
+| Dual Watchdog Status  | Logika penentuan status Online/Offline: 1. **Modbus**: Berdasarkan sukses/gagal ping TCP/Serial (Active). 2. **MQTT**: Berdasarkan kedaluwarsa interval penerimaan pesan terakhir (Passive Watchdog) |
 
-**Fungsi:**
+### Modul 3: Tag Engine & Data Normalization
 
-- Menambah perangkat baru
-- Mengedit konfigurasi perangkat yang sudah ada
-- Form input untuk nama, protokol, dan konfigurasi perangkat
+Penerjemah data mentah mesin menjadi parameter operasional.
 
-**Cara Akses:**
+| Fitur                      | Deskripsi Teknis                                                                                                                                                     |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Tag Addressing             | Manajemen mapping memori mesin (misal: 40001 untuk Modbus, topic/sensor1 untuk MQTT)                                                                                 |
+| Linear Scaling             | Konversi otomatis dari nilai perangkat keras (Raw: 0-4095) ke satuan ukur manusia (Engineering Unit: 0-100 °C)                                                       |
+| The Fast Loop (RAM Buffer) | Worker Service menyimpan nilai real-time terakhir dari seluruh Tag ke dalam RAM (ConcurrentDictionary) untuk menghilangkan latensi saat diakses oleh UI atau Storage |
 
-- Klik tombol "Add Device" untuk membuat perangkat baru
-- Klik tombol "Edit" pada card perangkat untuk mengedit
+### Modul 4: Data Engine & Storage
 
-##### b. Device Info Dialog
+Pengelola alur penyimpanan data ke database untuk keperluan historis dan reporting.
 
-Dialog untuk melihat informasi detail perangkat.
+| Fitur                         | Deskripsi Teknis                                                                                                                                     |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Dynamic Tables                | Fitur bagi pengguna untuk membuat tabel fisik MySQL secara dinamis via UI (tanpa coding) untuk laporan spesifik (misal: "Log Oven B")                |
+| Storage Flows (The Slow Loop) | Aturan ETL internal. Mengambil nilai dari RAM Buffer setiap Interval tertentu (misal: 60 detik) dan melakukan INSERT ke Dynamic Tables atau InfluxDB |
+| Historian Charting            | Visualisasi data masa lalu menggunakan grafik garis time-series yang interaktif (Zoom, Pan, Filter tanggal)                                          |
 
-![Device Info Dialog](./docs/images/device-info-dialog.png)
-_Screenshot Device Info Dialog_
+### Modul 5: Real-Time Dashboard
 
-**Fungsi:**
+Antarmuka visual responsif bagi operator.
 
-- Menampilkan informasi lengkap perangkat
-- Melihat status koneksi real-time
-- Detail konfigurasi perangkat
+| Fitur            | Deskripsi Teknis                                                                                                           |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| SignalR Pub/Sub  | UI hanya akan men-subscribe (masuk ke Group SignalR) data mesin yang sedang ditampilkan di layar untuk menghemat bandwidth |
+| Widget Library   | Komponen UI SCADA: Gauge, Value Card, Sparkline Chart, Status Lamp                                                         |
+| Live Device Grid | Tabel paginasi manajemen Device yang menampilkan indikator status (Hijau/Merah) dan pesan error secara real-time           |
 
-**Cara Akses:**
+## Non-Functional Requirements (NFR)
 
-- Klik tombol "Info" pada card perangkat
+- Performance (Latency): Dashboard harus mampu merender update untuk 50 Widget sekaligus dengan latensi dari PLC ke layar di bawah 200ms.
 
----
+- Scalability: Backend Worker (The Fast Loop) harus sanggup melakukan siklus baca untuk minimum 5.000 Tags setiap 1 detik tanpa memory leak.
 
-##### c. Chart Realtime Data
+- Reliability (Auto-Recovery): Driver komunikasi (Modbus/MQTT) wajib memiliki fitur Auto-Reconnect dengan exponential backoff jika jaringan pabrik terputus sementara.
 
-Dialog untuk melihat chart data secara real-time.
-
-![Device Realtime](./docs/images/device-realtime.png)
-_Screenshot Device Realtime_
-
-**Fungsi:**
-
-- Menampilkan chart real-time
-
-**Cara Akses:**
-
-- Klik tombol "Info" pada card perangkat
-
----
-
-### 2. Data Engine - Dynamic Tables
-
-Menu untuk membuat dan mengelola tabel dinamis untuk menyimpan data IoT.
-
-**URL:** `/data-engine/dynamic-tables`
-
-![Dynamic Tables](./docs/images/dynamic-tables.png)
-_Screenshot halaman Dynamic Tables_
-
-#### Fitur:
-
-- **Table Management**: Kelola tabel-tabel database secara dinamis
-- **Search**: Pencarian tabel berdasarkan nama
-- **Pagination**: Navigasi data dengan sistem paginasi (10 item per halaman)
-- **CRUD Operations**:
-  - Create: Buat tabel baru
-  - Read: Lihat daftar tabel
-  - Update: Edit konfigurasi tabel
-  - Delete: Hapus tabel dengan konfirmasi
-- **Field Management**: Kelola field/kolom pada setiap tabel
-
-#### Dialog yang Tersedia:
-
-##### a. Master Table Form Dialog
-
-Dialog untuk menambah atau mengedit tabel.
-
-![Master Table Form Dialog](./docs/images/master-table-form-dialog.png)
-_Screenshot Master Table Form Dialog_
-
-**Fungsi:**
-
-- Membuat tabel baru
-- Mengedit nama dan konfigurasi tabel
-- Form input untuk nama tabel dan deskripsi
-
-**Cara Akses:**
-
-- Klik tombol "Add Table" untuk membuat tabel baru
-- Pilih "Edit" dari dropdown menu pada baris tabel
-
-##### b. Master Table Fields Dialog
-
-Dialog untuk mengelola field/kolom pada tabel.
-
-![Master Table Fields Dialog](./docs/images/master-table-fields-dialog.png)
-_Screenshot Master Table Fields Dialog_
-
-**Fungsi:**
-
-- Menambah field/kolom baru ke tabel
-- Mengedit field yang sudah ada
-- Mengatur tipe data field (Text, Number, Boolean, Date, dll)
-- Menghapus field dari tabel
-- Mengatur field sebagai required/optional
-
-**Cara Akses:**
-
-- Pilih "Manage Fields" dari dropdown menu pada baris tabel
-
----
-
-## 🛠️ Instalasi & Penggunaan
-
-### Instalasi Dependencies
-
-```bash
-npm install
-```
-
-### Menjalankan Development Server
-
-```bash
-npm run dev
-```
-
-Aplikasi akan berjalan di `http://localhost:5173`
-
-### Build untuk Production
-
-```bash
-npm run build
-```
-
-## 🐳 Docker Deployment
-
-Build dan jalankan menggunakan Docker:
-
-```bash
-# Build image
-docker build -t synapse-iiot-fe .
-
-# Run container
-docker run -p 3000:3000 synapse-iiot-fe
-```
-
-## 📁 Struktur Project
-
-```
-app/
-├── components/        # Komponen UI reusable
-│   ├── layouts/      # Layout komponen & dialogs
-│   └── ui/           # UI components (Button, Card, dll)
-├── contexts/         # React contexts (Auth, dll)
-├── hooks/            # Custom hooks
-├── lib/              # Utilities & helpers
-├── routes/           # Halaman aplikasi
-├── services/         # API services
-└── types/            # TypeScript type definitions
-```
-
-## 🔐 Autentikasi
-
-Aplikasi menggunakan sistem autentikasi dengan fitur:
-
-- Login
-- Register
-- Protected Routes
-- Auth Context untuk state management
-
-## 📱 Fitur Real-time
-
-- **SignalR Integration**: Update data real-time untuk status perangkat
-- **Auto Refresh**: Data otomatis terupdate tanpa refresh halaman
-
-## 🎨 UI Components
-
-Aplikasi menggunakan custom UI components berbasis shadcn/ui:
-
-- Button, Card, Input, Label
-- Dialog, Sheet, Dropdown Menu
-- Tabs, Pagination
-- Breadcrumb, Sidebar
-- Spinner, Skeleton (loading states)
-- NoData component untuk empty states
-
----
-
-Built for Industrial IoT Solutions
+- Decoupling: Kerusakan atau antrean panjang pada database (Slow Loop) tidak boleh menyebabkan pembacaan sensor (Fast Loop) dan tampilan Dashboard menjadi lag atau macet.
