@@ -1,9 +1,0 @@
-<svg width="320" height="80" viewBox="0 0 320 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="320" height="80" rx="12" fill="#0D1117"/>
-  <g transform="translate(16 16)">
-    <circle cx="24" cy="24" r="12" fill="#00D4FF"/>
-    <path d="M24 4v8M24 36v8M4 24h8M36 24h8" stroke="#00D4FF" stroke-width="3" stroke-linecap="round"/>
-    <path d="M9 9l6 6M39 9l-6 6M9 39l6-6M39 39l-6-6" stroke="#00D4FF" stroke-width="2" stroke-linecap="round"/>
-  </g>
-  <text x="88" y="50" fill="#00D4FF" font-family="Exo 2, sans-serif" font-size="28" font-weight="600">Synapse IIoT</text>
-</svg>
