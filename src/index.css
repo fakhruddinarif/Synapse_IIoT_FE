@@ -1,113 +1,197 @@
 @import "tailwindcss";
 
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
+  --bg: #f4f7fb;
+  --bg-elevated: rgba(255, 255, 255, 0.82);
+  --bg-elevated-strong: #ffffff;
+  --surface: rgba(255, 255, 255, 0.68);
+  --surface-strong: #ffffff;
+  --surface-muted: rgba(244, 247, 251, 0.9);
+  --surface-tint: rgba(14, 165, 233, 0.08);
+  --text: #52627a;
+  --text-strong: #10233f;
+  --text-soft: #7d8ba0;
+  --border: rgba(130, 147, 170, 0.22);
+  --border-strong: rgba(130, 147, 170, 0.38);
+  --primary: #0f9d8f;
+  --primary-strong: #0d7f75;
+  --secondary: #3552ff;
+  --secondary-soft: rgba(53, 82, 255, 0.16);
+  --accent: #ff9f43;
+  --accent-soft: rgba(255, 159, 67, 0.16);
+  --success: #23b26d;
+  --danger: #e74c3c;
   --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+    rgba(15, 23, 42, 0.08) 0 18px 45px -18px,
+    rgba(15, 23, 42, 0.12) 0 8px 18px -12px;
+  --shadow-strong:
+    rgba(15, 23, 42, 0.16) 0 24px 60px -22px,
+    rgba(15, 23, 42, 0.1) 0 12px 28px -16px;
 
-  --sans: system-ui, "Segoe UI", Roboto, sans-serif;
-  --heading: system-ui, "Segoe UI", Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+  --sans: "Aptos", "Segoe UI", Inter, system-ui, sans-serif;
+  --heading: "Aptos Display", "Segoe UI", Inter, system-ui, sans-serif;
+  --mono: "Cascadia Code", ui-monospace, Consolas, monospace;
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
+  font: 16px/1.55 var(--sans);
+  letter-spacing: 0.01em;
+  color-scheme: light;
   color: var(--text);
-  background: var(--bg);
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(53, 82, 255, 0.12),
+      transparent 32%
+    ),
+    radial-gradient(
+      circle at top right,
+      rgba(15, 157, 143, 0.14),
+      transparent 28%
+    ),
+    linear-gradient(180deg, #f9fbfe 0%, #eef4fb 100%);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
+    --bg: #07111f;
+    --bg-elevated: rgba(9, 17, 31, 0.7);
+    --bg-elevated-strong: #09111f;
+    --surface: rgba(10, 19, 35, 0.72);
+    --surface-strong: #0b1526;
+    --surface-muted: rgba(12, 22, 38, 0.92);
+    --surface-tint: rgba(53, 82, 255, 0.14);
+    --text: #a7bbd8;
+    --text-strong: #f4f8ff;
+    --text-soft: #8ea4c5;
+    --border: rgba(137, 157, 186, 0.16);
+    --border-strong: rgba(137, 157, 186, 0.28);
+    --primary: #38d6c7;
+    --primary-strong: #1db7aa;
+    --secondary: #7a92ff;
+    --secondary-soft: rgba(122, 146, 255, 0.18);
+    --accent: #ffbf69;
+    --accent-soft: rgba(255, 191, 105, 0.14);
+    --success: #48d08b;
+    --danger: #ff7a73;
     --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
+      rgba(0, 0, 0, 0.35) 0 24px 60px -24px,
+      rgba(0, 0, 0, 0.2) 0 14px 30px -18px;
+    --shadow-strong:
+      rgba(0, 0, 0, 0.48) 0 30px 72px -26px,
+      rgba(0, 0, 0, 0.25) 0 18px 36px -20px;
+    color-scheme: dark;
+    background:
+      radial-gradient(
+        circle at top left,
+        rgba(122, 146, 255, 0.16),
+        transparent 28%
+      ),
+      radial-gradient(
+        circle at top right,
+        rgba(56, 214, 199, 0.12),
+        transparent 24%
+      ),
+      linear-gradient(180deg, #07111f 0%, #0b1526 100%);
   }
 }
 
 #root {
-  width: 1126px;
+  width: 100%;
   max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
+  margin: 0;
   min-height: 100svh;
-  display: flex;
-  flex-direction: column;
+  display: block;
   box-sizing: border-box;
 }
 
 body {
   margin: 0;
+  min-height: 100svh;
+  background: #030712;
+  color: #e5eefb;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+a {
+  color: inherit;
+}
+
+::selection {
+  background: rgba(53, 82, 255, 0.22);
+  color: var(--text-strong);
 }
 
 h1,
 h2 {
   font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
+  font-weight: 650;
+  color: var(--text-strong);
 }
 
 h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+  margin: 0;
 }
+
 h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
+  font-size: clamp(1.1rem, 1.8vw, 1.5rem);
+  line-height: 1.18;
+  letter-spacing: -0.02em;
+  margin: 0;
 }
+
 p {
   margin: 0;
 }
 
 code,
-.counter {
+pre {
   font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
 }
 
 code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+  display: inline-flex;
+  border-radius: 0.5rem;
+  color: var(--text-strong);
+  background: var(--surface-muted);
+  border: 1px solid var(--border);
+  padding: 0.15rem 0.45rem;
+}
+
+input {
+  color: inherit;
+}
+
+input::placeholder {
+  color: var(--text-soft);
+}
+
+@media (max-width: 1024px) {
+  :root {
+    font-size: 15px;
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  50% {
+    transform: translate3d(0, -14px, 0) scale(1.04);
+  }
 }
