@@ -1,5 +1,4 @@
 {
-<<<<<<< HEAD
   "include": ["src"],
   "compilerOptions": {
     "lib": ["DOM", "DOM.Iterable", "ES2022"],
@@ -25,11 +24,4 @@
     "isolatedModules": true,
     "useDefineForClassFields": true
   }
-=======
-  "files": [],
-  "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" }
-  ]
->>>>>>> 4a3a241fcce39718238fd40dff5c5c492dfb3ba5
 }

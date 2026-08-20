@@ -89,6 +89,25 @@ jumlah tabel/flow pada satu gateway ada di orde puluhan. Kalau kelak tumbuh,
 yang perlu berubah hanya hook-nya — halaman sudah bicara dalam istilah `Paging`
 yang sama.
 
+### Endpoint yang belum punya UI
+
+`FileController` (`/api/File`) sudah tersedia di backend tapi **belum ada
+halamannya** di frontend:
+
+| Endpoint | Fungsi |
+|---|---|
+| `POST /api/File/upload` | Unggah satu berkas |
+| `POST /api/File/upload-multiple` | Unggah banyak berkas |
+| `POST /api/File/upload-field` | Unggah berkas untuk satu kolom tabel dinamis |
+| `DELETE /api/File/delete` | Hapus berkas |
+| `GET /api/File/config` | Batas ukuran & tipe yang diizinkan |
+
+Sebuah implementasi halaman ini pernah ada di branch lain (`pages/files.tsx` +
+`api/files.ts`) tetapi ditulis di atas skeleton yang berbeda, jadi dihapus saat
+merge dirapikan. Kalau halaman Files dibutuhkan, ia diport ulang ke lapisan yang
+dijelaskan dokumen ini (`services/file.service.ts` + `pages/files/FilesPage.tsx`),
+bukan dihidupkan kembali apa adanya.
+
 ### Autentikasi — cookie HTTP-only
 
 Login memasang cookie `JWT-TOKEN` (HttpOnly, umur 1 jam). Konsekuensi yang
@@ -212,5 +231,6 @@ menerimanya lewat `ARG VITE_API_URL`.
 | `npm run dev` | Vite dev server (port 5173) |
 | `npm run build` | `tsc` + build produksi ke `dist/` |
 | `npm run typecheck` | Hanya `tsc --noEmit` |
+| `npm run lint` | ESLint (flat config, aturan react-hooks) |
 | `npm run preview` | Menyajikan `dist/` |
 | `docker build --build-arg VITE_API_URL=… .` | Image nginx statis |
