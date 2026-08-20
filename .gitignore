@@ -2,8 +2,5 @@
 .env
 /node_modules/
 
-# React Router
-/.react-router/
-/build/
-
-package-lock.json
+# Hasil build Vite
+/dist/

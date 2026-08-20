@@ -1,0 +1,289 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ===========================================================================
+   SYNAPSE IIoT — DESIGN TOKENS
+   Brand: rose (hue 345) yang diturunkan dari #FFD6E0.
+
+   #FFD6E0 adalah warna PERMUKAAN, bukan warna aksi: luminansinya ~0.75, jadi
+   teks putih di atasnya hanya 1.3:1. Ia dipakai sebagai jangkar tint
+   (`brand-200`) untuk kanvas, badge, dan gradasi chrome; sementara aksi
+   (tombol utama, nav aktif) memakai `brand-500` = #C43B65 yang memberi 5.05:1
+   dengan teks putih. Satu hue, dua peran — pastelnya tetap terasa tanpa
+   mengorbankan keterbacaan panel yang harus dibaca sekilas.
+=========================================================================== */
+
+@theme {
+  --color-brand-50: #fff5f8;
+  --color-brand-100: #ffe9ee;
+  --color-brand-200: #ffd6e0;
+  --color-brand-300: #f3a3bc;
+  --color-brand-400: #e06889;
+  --color-brand-500: #c43b65;
+  --color-brand-600: #a82f55;
+  --color-brand-700: #8a2645;
+  --color-brand-800: #6b1d35;
+  --color-brand-900: #4c1526;
+  --color-brand-950: #2e0c17;
+
+  /* Aksen sekunder — hanya untuk membedakan aliran data (IT layer) dari
+     perangkat (OT layer) pada diagram dan chart, bukan untuk aksi. */
+  --color-accent-50: #eef6ff;
+  --color-accent-100: #d9eaff;
+  --color-accent-300: #8cc2f7;
+  --color-accent-500: #2f7ed8;
+  --color-accent-600: #1f63b0;
+
+  --color-success-50: #f0fdf4;
+  --color-success-100: #bbf7d0;
+  --color-success-400: #4ade80;
+  --color-success-500: #16a34a;
+  --color-success-600: #15803d;
+
+  --color-warning-50: #fffbeb;
+  --color-warning-100: #fde68a;
+  --color-warning-400: #fbbf24;
+  --color-warning-500: #d97706;
+  --color-warning-600: #b45309;
+
+  --color-error-50: #fef2f2;
+  --color-error-100: #fecaca;
+  --color-error-400: #f87171;
+  --color-error-500: #dc2626;
+  --color-error-600: #b91c1c;
+
+  --color-info-50: #eff6ff;
+  --color-info-100: #bfdbfe;
+  --color-info-400: #60a5fa;
+  --color-info-500: #3b82f6;
+  --color-info-600: #2563eb;
+
+  --radius-card: 10px;
+  --radius-button: 8px;
+  --radius-input: 8px;
+  --radius-modal: 14px;
+  --radius-pill: 999px;
+
+  --shadow-card: 0 1px 2px rgb(76 21 38 / 0.06);
+  --shadow-dropdown: 0 4px 14px rgb(76 21 38 / 0.1);
+  --shadow-modal: 0 14px 40px rgb(76 21 38 / 0.16);
+
+  --breakpoint-xs: 480px;
+}
+
+@theme {
+  --color-gray-50: #fafafa;
+  --color-gray-100: #f5f5f5;
+  --color-gray-200: #e5e5e5;
+  --color-gray-300: #d4d4d4;
+  --color-gray-400: #a3a3a3;
+  --color-gray-500: #737373;
+  --color-gray-600: #525252;
+  --color-gray-700: #404040;
+  --color-gray-800: #262626;
+  --color-gray-900: #171717;
+  --color-gray-950: #0a0a0a;
+}
+
+/* ---------------------------------------------------------------------------
+   CHROME SURFACES
+   Gradasi brand di atas kanvas netral, hanya untuk chrome aplikasi (sidebar,
+   header, kanvas halaman). Kartu, tombol, dan input tetap rata — gradasi pada
+   permukaan interaktif membuat batas kontrol jadi kabur.
+
+   `--aurora-*` adalah simpul mesh yang didriftkan `AuroraBackdrop`;
+   `--grid-line` adalah tekstur grid halus di atasnya yang memberi kesan panel
+   instrumentasi.
+--------------------------------------------------------------------------- */
+:root {
+  --chrome-sidebar: linear-gradient(180deg, #fff0f4 0%, #fff8fa 46%, #ffffff 100%);
+  --chrome-header: linear-gradient(90deg, #fff2f6 0%, #fff9fb 48%, #ffffff 100%);
+  --chrome-content: linear-gradient(158deg, #ffffff 0%, #fff8fa 42%, #ffeef3 100%);
+  --chrome-line: #f6dbe3;
+  --chrome-line-soft: #fbeaef;
+
+  --aurora-1: rgb(255 214 224 / 0.85);
+  --aurora-2: rgb(255 233 238 / 0.9);
+  --aurora-3: rgb(243 163 188 / 0.42);
+  --aurora-4: rgb(217 234 255 / 0.5);
+  --aurora-sweep: rgb(255 255 255 / 0.5);
+  --grid-line: rgb(196 59 101 / 0.045);
+}
+
+.dark {
+  --chrome-sidebar: linear-gradient(180deg, #2a0f1a 0%, #1a0910 46%, #0a0a0a 100%);
+  --chrome-header: linear-gradient(90deg, #2a0f1a 0%, #1a0910 48%, #0a0a0a 100%);
+  --chrome-content: linear-gradient(158deg, #0a0a0a 0%, #150810 45%, #290f1a 100%);
+  --chrome-line: #3d1826;
+  --chrome-line-soft: #2a1019;
+
+  --aurora-1: rgb(196 59 101 / 0.3);
+  --aurora-2: rgb(107 29 53 / 0.42);
+  --aurora-3: rgb(224 104 137 / 0.16);
+  --aurora-4: rgb(47 126 216 / 0.16);
+  --aurora-sweep: rgb(255 214 224 / 0.06);
+  --grid-line: rgb(255 214 224 / 0.05);
+}
+
+@utility bg-chrome-sidebar {
+  background-image: var(--chrome-sidebar);
+}
+
+@utility bg-chrome-header {
+  background-image: var(--chrome-header);
+}
+
+@utility bg-chrome-content {
+  background-image: var(--chrome-content);
+}
+
+@utility border-chrome {
+  border-color: var(--chrome-line);
+}
+
+@utility border-chrome-soft {
+  border-color: var(--chrome-line-soft);
+}
+
+/* ---------------------------------------------------------------------------
+   AURORA MESH
+   Simpul gradien radial yang bergeser dengan periode berbeda (34s/46s/58s)
+   sehingga pertemuannya tidak pernah berulang persis — itu yang membuat polanya
+   terasa hidup, bukan sekadar bernapas seragam.
+
+   Yang dianimasikan hanya `transform` dan `opacity`; keduanya ditangani
+   compositor tanpa reflow, jadi grafik realtime dan tabel besar tetap mulus.
+   Semua dimatikan di `prefers-reduced-motion`.
+--------------------------------------------------------------------------- */
+@keyframes aurora-a {
+  0% {
+    transform: translate3d(-6%, -4%, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(8%, 6%, 0) scale(1.18);
+  }
+  100% {
+    transform: translate3d(-6%, -4%, 0) scale(1);
+  }
+}
+
+@keyframes aurora-b {
+  0% {
+    transform: translate3d(5%, 3%, 0) scale(1.1);
+  }
+  50% {
+    transform: translate3d(-7%, -6%, 0) scale(0.94);
+  }
+  100% {
+    transform: translate3d(5%, 3%, 0) scale(1.1);
+  }
+}
+
+@keyframes aurora-c {
+  0% {
+    transform: translate3d(0, 6%, 0) scale(1);
+    opacity: 0.85;
+  }
+  50% {
+    transform: translate3d(-6%, -8%, 0) scale(1.22);
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(0, 6%, 0) scale(1);
+    opacity: 0.85;
+  }
+}
+
+/* Sapuan cahaya diagonal yang melintas pelan — memberi arah pada pola supaya
+   tidak terbaca sebagai beberapa noda statis. */
+@keyframes aurora-sweep {
+  0% {
+    transform: translate3d(-40%, 0, 0) skewX(-12deg);
+  }
+  100% {
+    transform: translate3d(140%, 0, 0) skewX(-12deg);
+  }
+}
+
+@utility animate-aurora-a {
+  animation: aurora-a 34s ease-in-out infinite;
+}
+
+@utility animate-aurora-b {
+  animation: aurora-b 46s ease-in-out infinite;
+}
+
+@utility animate-aurora-c {
+  animation: aurora-c 58s ease-in-out infinite;
+}
+
+@utility animate-aurora-sweep {
+  animation: aurora-sweep 26s linear infinite;
+}
+
+/* ---------------------------------------------------------------------------
+   STATUS PULSE
+   Halo yang memancar dari titik status saat perangkat ONLINE. Yang bergerak
+   hanya cincin di belakang titik; titiknya tetap solid supaya statusnya masih
+   terbaca pada frame mana pun.
+--------------------------------------------------------------------------- */
+@keyframes status-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  70% {
+    transform: scale(2.8);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(2.8);
+    opacity: 0;
+  }
+}
+
+@utility animate-status-pulse {
+  animation: status-pulse 2s ease-in-out infinite;
+}
+
+/* Denyut aliran data pada garis penghubung OT ke IT. */
+@keyframes flow-dash {
+  to {
+    stroke-dashoffset: -24;
+  }
+}
+
+@utility animate-flow-dash {
+  animation: flow-dash 1.2s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-aurora-a,
+  .animate-aurora-b,
+  .animate-aurora-c,
+  .animate-aurora-sweep,
+  .animate-status-pulse,
+  .animate-flow-dash {
+    animation: none;
+  }
+}
+
+@layer base {
+  body {
+    @apply text-gray-900 antialiased;
+    background-color: #ffffff;
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+
+  .dark body {
+    @apply text-gray-100;
+    background-color: #0a0a0a;
+  }
+
+  /* Nilai telemetri berubah tiap detik — angka proporsional membuat lebarnya
+     goyang di setiap update. Tabular numerals mengunci lebarnya. */
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+}

@@ -1,22 +1,23 @@
-FROM node:20-alpine AS development-dependencies-env
-COPY . /app
+# ---------------------------------------------------------------------------
+# Build SPA statis, lalu layani lewat nginx.
+#
+# Berbeda dari image lama yang menjalankan `react-router-serve`: setelah migrasi
+# ke Vite SPA tidak ada lagi server render — hasil build hanyalah berkas statis,
+# dan menjalankan Node hanya untuk mengirimkannya berarti menyalakan runtime
+# tambahan di perangkat gateway yang sumber dayanya terbatas.
+# ---------------------------------------------------------------------------
+FROM node:20-alpine AS build
 WORKDIR /app
+COPY package.json package-lock.json ./
 RUN npm ci
-
-FROM node:20-alpine AS production-dependencies-env
-COPY ./package.json package-lock.json /app/
-WORKDIR /app
-RUN npm ci --omit=dev
-
-FROM node:20-alpine AS build-env
-COPY . /app/
-COPY --from=development-dependencies-env /app/node_modules /app/node_modules
-WORKDIR /app
+COPY . .
+# VITE_* dibaca saat build, bukan saat runtime — nilainya ikut tertanam ke bundel.
+ARG VITE_API_URL
+ENV VITE_API_URL=$VITE_API_URL
 RUN npm run build
 
-FROM node:20-alpine
-COPY ./package.json package-lock.json /app/
-COPY --from=production-dependencies-env /app/node_modules /app/node_modules
-COPY --from=build-env /app/build /app/build
-WORKDIR /app
-CMD ["npm", "run", "start"]
+FROM nginx:1.27-alpine
+COPY --from=build /app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
